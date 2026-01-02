@@ -1,6 +1,10 @@
 """
 This program controls a smart plug with HTTP requests based on the humidity
 measured with a RuuviTag Bluetooth humidity sensor.
+
+The program runs every minute with the help of cron:
+    * * * * * cd ~/Humidifier_control && \
+      ~/Humidifier_control/Humidifier_venv/bin/python control.py
 """
 
 # NOTICE: This program includes code from the following libraries:
