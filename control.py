@@ -55,6 +55,7 @@ The program runs every minute with the help of cron:
 import requests
 import asyncio
 from ruuvitag_sensor.ruuvi import RuuviTagSensor
+import datetime
 
 
 async def monitor_and_control_humidity(ruuvitag_mac, plug_ip):
@@ -87,6 +88,10 @@ async def monitor_and_control_humidity(ruuvitag_mac, plug_ip):
                     control_plug(plug_ip, turn_on=True)
                 else:
                     pass
+
+                plug_on = get_plug_status(plug_ip)
+                status = "on" if plug_on else "off"
+                save_system_status_to_file(status, humidity)
 
                 if len(datas) > 0:
                     break
@@ -154,6 +159,25 @@ def get_conf_info(conf_file_name):
     except OSError:
         print(f"Error: opening the file '{conf_file_name}' failed!")
         return []
+    
+def save_system_status_to_file(status, humidity):
+    """
+    Saves the plug status and humidity with a timestamp to the file.
+    
+    :param status: str, current on/off status of the Shelly plug.
+    :param humidity: float, the measured relative humidity.
+    """
+    
+    current_time = datetime.datetime.now()
+    data_file_name = "Data.txt"
+    try:
+        data_file = open(data_file_name, mode='a')
+        data_file.write(f"{current_time}: Shelly plug is {status}, "
+                        f"and the humidity is {humidity} % RH.\n")
+        data_file.close()
+    except OSError:
+        print(f"Error: writing to the file '{data_file_name}' failed!")
+        return
 
 
 def main():
