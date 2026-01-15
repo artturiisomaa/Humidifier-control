@@ -24,6 +24,10 @@ async def monitor_and_control_humidity(ruuvitag_mac, plug_ip):
             async for found_data in RuuviTagSensor.get_data_async(ruuvitag_mac):
                 humidity = found_data[1]["humidity"]
                 plug_on = get_plug_status(plug_ip)
+
+                if plug_on == None:
+                    break
+
                 status = "on" if plug_on else "off"
                 print(f"Plug is {status}, and the humidity is {humidity} % RH.")
                 datas.append(found_data)
@@ -50,19 +54,21 @@ def get_plug_status(ip_address):
     Gets the status of the smart plug.
 
     :param ip_address: str, the IP addres of the smart plug.
-    :return: str, the satus of the plug (on/off).
+    :return: bool or None, True if the plug is on, False if off.
     """
 
     url = f"http://{ip_address}/relay/0"
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=5)
         if response.status_code == 200:
             status = response.json()["ison"]
             return status
         else:
             print("Failed to get status.")
+            return None
     except:
         print("An error occurred while getting status.")
+        return None
 
 
 def control_plug(ip_address, turn_on=True):
@@ -76,7 +82,7 @@ def control_plug(ip_address, turn_on=True):
     command = "on" if turn_on else "off"
     url = f"http://{ip_address}/relay/0?turn={command}"
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=5)
         if response.status_code == 200:
             print(f"Plug turned {command} succesfully.")
         else:
