@@ -23,7 +23,7 @@ async def monitor_and_control_humidity(ruuvitag_mac, plug_ip):
         async with asyncio.timeout(10):
             async for found_data in RuuviTagSensor.get_data_async(ruuvitag_mac):
                 humidity = found_data[1]["humidity"]
-                plug_on = get_plug_status(plug_ip)
+                plug_on = await asyncio.to_thread(get_plug_status, plug_ip)
 
                 if plug_on == None:
                     break
@@ -33,14 +33,15 @@ async def monitor_and_control_humidity(ruuvitag_mac, plug_ip):
                 datas.append(found_data)
 
                 if humidity > humidity_threshold_off and plug_on:
-                    control_plug(plug_ip, turn_on=False)
+                    await asyncio.to_thread(control_plug, plug_ip, turn_on=False)
                 elif humidity < humidity_threshold_on and not plug_on:
-                    control_plug(plug_ip, turn_on=True)
+                    await asyncio.to_thread(control_plug, plug_ip, turn_on=True)
                 else:
                     pass
 
-                plug_on = get_plug_status(plug_ip)
+                plug_on = await asyncio.to_thread(get_plug_status, plug_ip)
                 status = "on" if plug_on else "off"
+
                 save_system_status_to_file(status, humidity)
 
                 if len(datas) > 0:
