@@ -19,7 +19,14 @@ has been updated since.
 Install the required dependencies using 'pip'. It is recommended to do this 
 inside a virtual environment:
 ```bash
-# Optional: create and activate a virtual environment
+# Update package list
+sudo apt update
+
+# Install Python and Python virtual environment
+sudo apt install python3
+sudo apt install python3-venv
+
+# Create and activate a virtual environment
 python -m venv venv
 source venv/bin/activate
 
